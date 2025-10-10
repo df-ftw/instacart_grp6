@@ -7,15 +7,15 @@
 	*Instacart Market Basket Analysis* 
 
 - **Goal of the Exercise:**  
-  * The goal of the exercise is to develop a business question, Apply Normalization → Dimensional Modeling → Data Quality Dashboard using the Instacart Market Basket dataset.*  
+  *The goal of the exercise is to develop a business question, Apply Normalization → Dimensional Modeling → Data Quality Dashboard using the Instacart Market Basket dataset.*  
 
 - **Team Setup:**  
-  - Standard Data Cleaning: All members
-		- Addy: Departments
-		- Aly:   Aisles
-		- Angel: Orders
-		- Nella: Products
-		- Wish: Combination of prior and train
+  - Standard Data Cleaning: *All members*
+	- Addy: Departments
+	- Aly:   Aisles
+	- Angel: Orders
+	- Nella: Products
+	- Wish: Combination of prior and train
 		
   - Data Quality (DQ) Checks:
 		- Row Count comparison between raw and clean tables – Wish
@@ -138,7 +138,7 @@
 ## 7. Future Improvements
 
 - **Next Steps with More Time:**  
-  - - Will try to explore more business questions  
+  - Will try to explore more business questions  
 
 - **Generalization:**  (for update)
   *(How this workflow could be applied to other datasets or business domains.)*  
