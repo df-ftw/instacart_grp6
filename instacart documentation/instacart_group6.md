@@ -101,17 +101,19 @@ ftw-de-bootcamp/
 ⚙️**Source Structure (Normalized):**  
 The flow of data from data sources through a series of transformations into a mart schema:
   1. Data Sources:
-    ```
+    
+	```
 	- aisles.csv
     - departments.csv
     - order_products__prior.csv
 	- order_products__train.csv
 	- orders.csv
 	- products.csv
-	
 	```
+	
   2. Raw Schema:
   The raw data from each source is loaded into the raw schema:
+	
 	```
     - raw___insta_aisles
     - raw___insta_departments
@@ -119,15 +121,15 @@ The flow of data from data sources through a series of transformations into a ma
 	- raw___insta_order_products_train
 	- raw___insta_orders
 	- raw___insta_products
-	
 	```
 	
   3. Clean Schema:
   After cleaning and preprocessing, the data is transformed into the clean schema:
 
-	- stg_insta_aisles_grp6
-```
+- stg_insta_aisles_grp6
 
+	
+```
 {{config(materialized = "table", 
 	engine = "MergeTree()", 
 	order_by = ["aisle_id"], 
@@ -143,10 +145,10 @@ select DISTINCT
 )
 select *
 from insta_aisles
-	
 ```
 
-    - stg_insta_department_grp6
+- stg_insta_department_grp6
+
 ```
 {{config(materialized = "table", 
 	engine = "MergeTree()", 
@@ -164,9 +166,9 @@ select DISTINCT
 select *
 from insta_department
 order by department
-
 ```
-    - stg_insta_eval_sets_grp6
+
+- stg_insta_eval_sets_grp6
 	
 ```
 {{ config(materialized = "table", schema = "clean", tags = ["staging", "instacartgrp6"]) }}
@@ -181,7 +183,7 @@ from (
 
 ```
 
-	- stg_insta_order_products_grp6
+- stg_insta_order_products_grp6
 	
 ```
 {{ config(
@@ -213,10 +215,9 @@ order_products_prior as (
 select * from order_products_train
 union all
 select * from order_products_prior
-
 ```
 
-	- stg_insta_orders_grp6
+- stg_insta_orders_grp6
 	
 ```
 {{ config(materialized = "table", schema = "clean", tags = ["staging", "instacartgrp6"]) }}
@@ -236,9 +237,12 @@ select
 from {{ source('raw', 'raw___insta_orders') }} as o
 join {{ ref('stg_insta_eval_sets_grp6') }} as e
   on trim(lower(o.eval_set)) = e.eval_set_name
-  
 ```
-	- stg_insta_products_grp6
+
+
+- stg_insta_products_grp6
+
+
 ```
 {{config(materialized = "table", 
 	engine = "MergeTree()", 
@@ -257,9 +261,11 @@ select DISTINCT
 )
 select *
 from insta_products
-
 ```
-	- stg_insta_users_grp6
+
+- stg_insta_users_grp6
+
+
 ```
 {{ config(materialized = "table", schema = "clean", tags = ["staging", "instacartgrp6"]) }}
 -- Keep one row per user; clean and cast IDs properly.
@@ -268,9 +274,11 @@ select
 from {{ source('raw', 'raw___insta_orders') }}
 where user_id is not null
 group by user_id
-
 ```
-	- dq_insta_referential_integrity_check_grp6
+
+	
+- dq_insta_referential_integrity_check_grp6
+
 	
 ```
 {{ config(
@@ -311,11 +319,10 @@ select
     end as dq_status
 from final
 order by dq_status
-
-
 ```
 
-	- dq_insta_row_count_diff_checker_grp6
+- dq_insta_row_count_diff_checker_grp6
+
 	
 ```
 {{ config(
@@ -440,13 +447,13 @@ final as (
 )
 
 select * from final
-
 ```
 
   4. Mart Schema: (for update)
   The cleaned data is then further processed into the mart schema, where it is modeled for analysis:
   
-	- grp6_insta_dim_aisles
+- grp6_insta_dim_aisles
+	
 ```
 {{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
 SELECT
@@ -455,7 +462,9 @@ SELECT
 FROM {{ ref('stg_insta_aisles_grp6') }}	
 
 ```	
-	- grp6_insta_dim_departments
+
+- grp6_insta_dim_departments
+
 ```
 {{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
 SELECT
@@ -464,7 +473,10 @@ SELECT
 FROM {{ ref('stg_insta_department_grp6') }}
 
 ```
-	- grp6_insta_dim_dow
+
+- grp6_insta_dim_dow
+
+
 ```
 {{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
 SELECT DISTINCT
@@ -481,7 +493,9 @@ SELECT DISTINCT
 FROM {{ ref('stg_insta_orders_grp6') }}
 WHERE order_dow IS NOT NULL
 ```
-	- grp6_insta_dim_eval_sets
+
+- grp6_insta_dim_eval_sets
+
 ```
 {{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
 SELECT
@@ -498,7 +512,9 @@ SELECT
     product_name
 FROM {{ ref('stg_insta_products_grp6') }}
 ```
-	- grp6_insta_dim_users
+
+- grp6_insta_dim_users
+
 
 ```
 {{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
@@ -507,7 +523,9 @@ SELECT
 FROM {{ ref('stg_insta_users_grp6') }}
 
 ```
-	- grp6_insta_fact_order_products
+
+- grp6_insta_fact_order_products
+
 
 ```
 {{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
@@ -532,13 +550,13 @@ SELECT
     o.order_hour_of_day,
     o.days_since_prior_order
 FROM {{ ref('stg_insta_orders_grp6') }} o
-
 ```
 	
 	
 	
 
-	
+
+
 ![ERD](./ERD.png)
  
   
