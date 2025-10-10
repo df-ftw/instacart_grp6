@@ -50,19 +50,17 @@
 - **Medallion Architecture Application:**  
 
   - **Bronze (Raw):** *Initial ingestion of source data (Skipped)*  
-  - **Silver (Clean):** 
-		  - Purpose: To provide a reliable, queryable "single source of truth" for major business entities.
-		  
-		  - Key Activities:
-				- Cleaning: We cast the appropriate columns needed and fix data quality issues.
-				- Conforming: We standardize data types, apply consistent naming conventions, and ensure conformity across different sources.
-				- Enriching: We join tables from different sources to create a more complete view.
-				- State of the Data: Validated, cleaned, and organized by business concepts
-
   
+  - **Silver (Clean):** 
+	- Purpose: To provide a reliable, queryable "single source of truth" for major business entities.
+		  
+	- Key Activities:
+		- Cleaning: We cast the appropriate columns needed and fix data quality issues.
+		- Conforming: We standardize data types, apply consistent naming conventions, and ensure conformity across different sources.
+		- Enriching: We join tables from different sources to create a more complete view.
+		- State of the Data: Validated, cleaned, and organized by business concepts
+
   - **Gold (Mart):** *We build our star schemas (fact and dimension tables) in this layer.*  
-
-
 
 ---
 
