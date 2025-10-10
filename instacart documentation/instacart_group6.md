@@ -103,24 +103,28 @@ The flow of data from data sources through a series of transformations into a ma
   1. Data Sources:
     
 	```
+	
 	- aisles.csv
     - departments.csv
     - order_products__prior.csv
 	- order_products__train.csv
 	- orders.csv
 	- products.csv
+	
 	```
 	
   2. Raw Schema:
   The raw data from each source is loaded into the raw schema:
 	
 	```
+	
     - raw___insta_aisles
     - raw___insta_departments
     - raw___insta_order_products_prior
 	- raw___insta_order_products_train
 	- raw___insta_orders
 	- raw___insta_products
+	
 	```
 	
   3. Clean Schema:
@@ -504,7 +508,7 @@ SELECT
 FROM {{ ref('stg_insta_eval_sets_grp6') }}
 
 ```
-	- grp6_insta_dim_products
+- grp6_insta_dim_products
 ```
 {{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
 SELECT
@@ -537,7 +541,9 @@ SELECT
 FROM {{ ref('stg_insta_order_products_grp6') }} op
 
 ```
-	- grp6_insta_fact_orders
+
+- grp6_insta_fact_orders
+
 
 ```
 {{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
