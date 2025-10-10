@@ -66,7 +66,39 @@
 
 ## 3. Modeling Process 
 
-- **Source Structure (Normalized):**  
+## 📂 Folder Structure
+
+```
+ftw-de-bootcamp/
+└── dbt/
+    └── transforms/
+        └── instacart_grp6/
+            ├── models/
+            │   ├── clean/
+			│   │   └── stg_insta_aisles_grp6
+			│   │   └── stg_insta_department_grp6
+			│   │   └── stg_insta_eval_sets_grp6
+			│   │   └── stg_insta_order_products_grp6
+			│   │   └── stg_insta_orders_grp6
+			│   │   └── stg_insta_products_grp6
+			│   │   └── stg_insta_users_grp6
+			│   │   └── dq_insta_referential_integrity_check_grp6
+			│   │   └── dq_insta_row_count_diff_checker_grp6
+            │   │   └── schema.yml
+            │   └── mart/
+            │       └── grp6_insta_dim_aisles
+            │       └── grp6_insta_dim_departments
+            │       └── grp6_insta_dim_dow
+            │       └── grp6_insta_dim_eval_sets
+            │       └── grp6_insta_dim_products
+            │       └── grp6_insta_dim_users
+            │       └── grp6_insta_fact_order_products
+            │       └── grp6_insta_fact_orders
+            ├── target/              					# dbt docs output (after generation)
+            └── ...
+```
+
+⚙️**Source Structure (Normalized):**  
 The flow of data from data sources through a series of transformations into a mart schema:
   1. Data Sources:
     ```
@@ -92,34 +124,429 @@ The flow of data from data sources through a series of transformations into a ma
 	
   3. Clean Schema:
   After cleaning and preprocessing, the data is transformed into the clean schema:
-	```
-    - stg_insta_aisles_grp6
+
+	- stg_insta_aisles_grp6
+```
+
+{{config(materialized = "table", 
+	engine = "MergeTree()", 
+	order_by = ["aisle_id"], 
+	schema = "clean", 
+	tags=["staging", "instacart_grp6"])}}
+
+with insta_aisles as (
+select DISTINCT 
+  cast(aisle_id as Int64) as aisle_id,
+  trim(initcap(lower(cast(aisle as Nullable(String))))) as aisle
+ from {{source('raw', 'raw___insta_aisles')}}
+ where aisle_id is not null
+)
+select *
+from insta_aisles
+	
+```
+
     - stg_insta_department_grp6
+```
+{{config(materialized = "table", 
+	engine = "MergeTree()", 
+	order_by = ["department_id"], 
+	schema = "clean", 
+	tags=["staging", "instacart_grp6"])}}
+
+with insta_department as (
+select DISTINCT 
+  cast(department_id as Int64) as department_id,
+  trim(initcap(lower(cast(department as Nullable(String))))) as department
+ from {{source('raw', 'raw___insta_departments')}}
+ where department_id is not null
+)
+select *
+from insta_department
+order by department
+
+```
     - stg_insta_eval_sets_grp6
+	
+```
+{{ config(materialized = "table", schema = "clean", tags = ["staging", "instacartgrp6"]) }}
+-- Lookup for evaluation sets (train, prior, test, etc.)
+select
+  row_number() over () as eval_set_id,
+  trim(lower(eval_set)) as eval_set_name
+from (
+  select distinct eval_set
+  from {{ source('raw', 'raw___insta_orders') }}
+) as distinct_sets
+
+```
+
 	- stg_insta_order_products_grp6
+	
+```
+{{ config(
+    materialized = "table",
+    engine = "MergeTree()",
+    order_by = ["order_id", "product_id"],
+    schema = "clean",
+    tags = ["staging", "instacart_grp6"]
+) }}
+
+with order_products_train as (
+    select 
+        cast(order_id as Int64) as order_id,
+        cast(product_id as Int64) as product_id,
+        cast(add_to_cart_order as Int64) as add_to_cart_order,
+        cast(reordered as Int64) as reordered
+    from {{ source('raw', 'raw___insta_order_products_train') }}
+),
+
+order_products_prior as (
+    select 
+        cast(order_id as Int64) as order_id,
+        cast(product_id as Int64) as product_id,
+        cast(add_to_cart_order as Int64) as add_to_cart_order,
+        cast(reordered as Int64) as reordered
+    from {{ source('raw', 'raw___insta_order_products_prior') }}
+)
+
+select * from order_products_train
+union all
+select * from order_products_prior
+
+```
+
 	- stg_insta_orders_grp6
+	
+```
+{{ config(materialized = "table", schema = "clean", tags = ["staging", "instacartgrp6"]) }}
+-- Clean orders table with FK references to users and eval_sets
+select
+  cast(o.order_id as int) as order_id,
+  cast(o.user_id as int) as user_id,
+  cast(e.eval_set_id as int) as eval_set_id,
+  cast(o.order_number as int) as order_number,
+  cast(o.order_dow as int) as order_dow,
+  cast(o.order_hour_of_day as int) as order_hour_of_day,
+  -- Handle missing or NaN values properly
+  case
+    when lower(o.days_since_prior_order) in ('', 'nan') then null
+    else cast(o.days_since_prior_order as float)
+  end as days_since_prior_order
+from {{ source('raw', 'raw___insta_orders') }} as o
+join {{ ref('stg_insta_eval_sets_grp6') }} as e
+  on trim(lower(o.eval_set)) = e.eval_set_name
+  
+```
 	- stg_insta_products_grp6
+```
+{{config(materialized = "table", 
+	engine = "MergeTree()", 
+	order_by = ["product_id"], 
+	schema = "clean", 
+	tags=["staging", "instacart_grp6"])}}
+
+with insta_products as (
+select DISTINCT 
+  cast(product_id as Int64) as product_id,
+  trim(initcap(lower(cast(product_name as Nullable(String))))) as product_name,
+  cast(aisle_id as Int64) as aisle_id,
+  cast(department_id as Int64) as department_id
+ from {{source('raw', 'raw___insta_products')}}
+ where product_id is not null
+)
+select *
+from insta_products
+
+```
 	- stg_insta_users_grp6
+```
+{{ config(materialized = "table", schema = "clean", tags = ["staging", "instacartgrp6"]) }}
+-- Keep one row per user; clean and cast IDs properly.
+select
+  cast(user_id as int) as user_id
+from {{ source('raw', 'raw___insta_orders') }}
+where user_id is not null
+group by user_id
+
+```
+	- dq_insta_referential_integrity_check_grp6
 	
-	```
+```
+{{ config(
+    materialized = "table",
+    schema = "clean",
+    tags = ["dq_check", "instacart_grp6"]
+) }}
+
+--check from child table insta_products is also existing to the parent table insta_aisles table
+with dq_aisle_fk as(
+    select now() as log_time,
+    'insta_products' as table_group,
+    'Referential Integrity (aisle_id to aisles)' as dq_test_type,
+    count(*) as total_child_records,
+    countIf(a.aisle_id is not null) as matched_parent_records,
+    countIf(a.aisle_id is null) as unmatched_records
+    from {{ ref('stg_insta_products_grp6') }} p 
+    left join {{ ref('stg_insta_aisles_grp6') }} a
+        on p.aisle_id = a.aisle_id 
+),
+
+
+
+final as (
+    select * from dq_aisle_fk
+)
+
+select 
+    log_time,
+    table_group,
+    dq_test_type,
+    total_child_records,
+    matched_parent_records,
+    unmatched_records,
+    round((unmatched_records * 100.0 / total_child_records),2) as percentage_of_unmatched,
+    case when unmatched_records = 0 then 'PASS'
+        else 'FAIL'
+    end as dq_status
+from final
+order by dq_status
+
+
+```
+
+	- dq_insta_row_count_diff_checker_grp6
 	
+```
+{{ config(
+    materialized = "table",
+    schema = "clean",
+    tags = ["dq_check", "instacart_grp6"]
+) }}
+
+with dq_insta_aisles as (
+    select
+        now() as log_time,
+        'insta_aisles' as table_group,
+        'Row count comparison (raw vs clean)' as dq_test_type,
+        (select count(*) from {{ source('raw', 'raw___insta_aisles') }}) as raw_count,
+        (select count(*) from {{ ref('stg_insta_aisles_grp6') }}) as clean_count
+        
+),
+
+dq_insta_department as (
+    select
+        now() as log_time,
+        'insta_department' as table_group,
+        'Row count comparison (raw vs clean)' as dq_test_type,
+        (select count(*) from {{ source('raw', 'raw___insta_departments') }}) as raw_count,
+        (select count(*) from {{ ref('stg_insta_department_grp6') }}) as clean_count
+),
+
+dq_insta_products as (
+    select
+        now() as log_time,
+        'insta_products' as table_group,
+        'Row count comparison (raw vs clean)' as dq_test_type,
+        (select count(*) from {{ source('raw', 'raw___insta_products') }}) as raw_count,
+        (select count(*) from {{ ref('stg_insta_products_grp6') }}) as clean_count
+),
+
+dq_insta_order_products as (
+    select
+        now() as log_time,
+        'insta_order_products' as table_group,
+        'Row count comparison (raw vs clean)' as dq_test_type,
+        (select
+                sum(raw_count)
+            from (
+                select count(*) as raw_count from {{ source('raw', 'raw___insta_order_products_prior') }}
+                union all
+                select count(*) as raw_count from {{ source('raw', 'raw___insta_order_products_train') }}
+            ) t
+        ) as raw_count,
+        (select count(*) from {{ ref('stg_insta_order_products_grp6') }}) as clean_count
+),
+
+dq_insta_orders as (
+    select
+        now() as log_time,
+        'insta_orders' as table_group,
+        'Row count comparison (raw vs clean)' as dq_test_type,
+        (
+            (select count(*) from {{ source('raw', 'raw___insta_orders') }}) as raw_count,
+            (select count(*) from {{ ref('stg_insta_orders_grp6') }}) as clean_count
+        )
+),
+
+final as (
+    select
+        log_time,
+        table_group,
+        dq_test_type,
+        raw_count,
+        clean_count,
+        (clean_count - raw_count) as row_diff,
+        case
+            when clean_count = raw_count then 'PASS'
+            else 'MISMATCH'
+        end as dq_status
+    from dq_insta_aisles
+
+    union all
+
+    select
+        log_time,
+        table_group,
+        dq_test_type,
+        raw_count,
+        clean_count,
+        (clean_count - raw_count) as row_diff,
+        case
+            when clean_count = raw_count then 'PASS'
+            else 'MISMATCH'
+        end as dq_status
+    from dq_insta_department
+
+    union all
+
+    select
+        log_time,
+        table_group,
+        dq_test_type,
+        raw_count,
+        clean_count,
+        (clean_count - raw_count) as row_diff,
+        case
+            when clean_count = raw_count then 'PASS'
+            else 'MISMATCH'
+        end as dq_status
+    from dq_insta_products
+
+    union all
+
+    select
+        log_time,
+        table_group,
+        dq_test_type,
+        raw_count,
+        clean_count,
+        (clean_count - raw_count) as row_diff,
+        case
+            when clean_count = raw_count then 'PASS'
+            else 'MISMATCH'
+        end as dq_status
+    from dq_insta_order_products
+)
+
+select * from final
+
+```
+
   4. Mart Schema: (for update)
   The cleaned data is then further processed into the mart schema, where it is modeled for analysis:
+  
+	- grp6_insta_dim_aisles
+```
+{{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
+SELECT
+    aisle_id,
+    aisle
+FROM {{ ref('stg_insta_aisles_grp6') }}	
 
+```	
+	- grp6_insta_dim_departments
+```
+{{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
+SELECT
+    department_id,
+    department
+FROM {{ ref('stg_insta_department_grp6') }}
 
+```
+	- grp6_insta_dim_dow
+```
+{{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
+SELECT DISTINCT
+    order_dow,
+    CASE order_dow
+        WHEN 0 THEN 'Sunday'
+        WHEN 1 THEN 'Monday'
+        WHEN 2 THEN 'Tuesday'
+        WHEN 3 THEN 'Wednesday'
+        WHEN 4 THEN 'Thursday'
+        WHEN 5 THEN 'Friday'
+        WHEN 6 THEN 'Saturday'
+    END AS name_of_day
+FROM {{ ref('stg_insta_orders_grp6') }}
+WHERE order_dow IS NOT NULL
+```
+	- grp6_insta_dim_eval_sets
+```
+{{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
+SELECT
+    eval_set_id,
+    eval_set_name
+FROM {{ ref('stg_insta_eval_sets_grp6') }}
 
+```
+	- grp6_insta_dim_products
+```
+{{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
+SELECT
+    product_id,
+    product_name
+FROM {{ ref('stg_insta_products_grp6') }}
+```
+	- grp6_insta_dim_users
 
+```
+{{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
+SELECT
+    user_id
+FROM {{ ref('stg_insta_users_grp6') }}
+
+```
+	- grp6_insta_fact_order_products
+
+```
+{{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
+SELECT
+    op.order_id,
+    op.product_id,
+    op.add_to_cart_order,
+    op.reordered
+FROM {{ ref('stg_insta_order_products_grp6') }} op
+
+```
+	- grp6_insta_fact_orders
+
+```
+{{ config(materialized = "table", schema = "mart", tags = ["mart", "instacartgrp6"]) }}
+SELECT
+    o.order_id,
+    o.user_id,
+    o.eval_set_id,
+    o.order_number,
+    o.order_dow,
+    o.order_hour_of_day,
+    o.days_since_prior_order
+FROM {{ ref('stg_insta_orders_grp6') }} o
+
+```
+	
+	
+	
+
+	
 ![ERD](./ERD.png)
  
   
-  
-  
-
-- **Star Schema Design:** (For update) 
+⚙️ **Star Schema Design:** (For update) 
   - Fact Tables: *(e.g., FactSales, FactAssessment, FactRatings)*  
   - Dimension Tables: *(e.g., Customer, Date, Genre, Student, Demographics, Title, Person)*  
 
-- **Challenges / Tradeoffs:**  
+⚙️ **Challenges / Tradeoffs:**  
   *(E.g., handling missing data, many-to-many joins, exploding arrays, performance considerations.)*  
 
 ---
