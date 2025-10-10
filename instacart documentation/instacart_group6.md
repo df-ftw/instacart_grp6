@@ -18,11 +18,11 @@
 	- Wish: Combination of prior and train
 		
   - Data Quality (DQ) Checks:
-		- Row Count comparison between raw and clean tables – Wish
-		- Referential Integrity check – Wish
+	- Row Count comparison between raw and clean tables – Wish
+	- Referential Integrity check – Wish
 		
   - Data Modeling:
-		- Create Fact and Dimension Tables based on the business question – Angel
+	- Create Fact and Dimension Tables based on the business question – Angel
 
   - Documentation: Aly and Nella 
 
