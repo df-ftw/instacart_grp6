@@ -64,12 +64,58 @@
 
 ---
 
-## 3. Modeling Process (For update)
+## 3. Modeling Process 
 
 - **Source Structure (Normalized):**  
-  *(Describe how the original tables were structured — 3NF, relationships, etc.)*  
+The flow of data from data sources through a series of transformations into a mart schema:
+  1. Data Sources:
+    ```
+	- aisles.csv
+    - departments.csv
+    - order_products__prior.csv
+	- order_products__train.csv
+	- orders.csv
+	- products.csv
+	
+	```
+  2. Raw Schema:
+  The raw data from each source is loaded into the raw schema:
+	```
+    - raw___insta_aisles
+    - raw___insta_departments
+    - raw___insta_order_products_prior
+	- raw___insta_order_products_train
+	- raw___insta_orders
+	- raw___insta_products
+	
+	```
+	
+  3. Clean Schema:
+  After cleaning and preprocessing, the data is transformed into the clean schema:
+	```
+    - stg_insta_aisles_grp6
+    - stg_insta_department_grp6
+    - stg_insta_eval_sets_grp6
+	- stg_insta_order_products_grp6
+	- stg_insta_orders_grp6
+	- stg_insta_products_grp6
+	- stg_insta_users_grp6
+	
+	```
+	
+  4. Mart Schema: (for update)
+  The cleaned data is then further processed into the mart schema, where it is modeled for analysis:
 
-- **Star Schema Design:**  
+
+
+
+![ERD](./ERD.png)
+ 
+  
+  
+  
+
+- **Star Schema Design:** (For update) 
   - Fact Tables: *(e.g., FactSales, FactAssessment, FactRatings)*  
   - Dimension Tables: *(e.g., Customer, Date, Genre, Student, Demographics, Title, Person)*  
 
