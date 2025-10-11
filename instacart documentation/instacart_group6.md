@@ -472,6 +472,123 @@ final as (
 select * from final
 ```
 
+- schema.yml
+
+```
+version: 2
+
+models:
+#DQ Check for Aisles table
+  - name: stg_insta_aisles_grp6
+    description: "no nulls or empty values"
+    columns:
+      - name: aisle
+        description: "Name of aisle"
+        tests:
+          - not_null
+      - name: aisle_id
+        description: "Unique identifier for each aisle"
+        tests:
+          - not_null
+          - unique
+
+#DQ Check for Department Table
+  - name: stg_insta_department_grp6
+    description: "no nulls or empty values"
+    columns:
+      - name: department
+        description: "Name of department"
+        tests:
+          - not_null
+      - name: department_id
+        description: "Unique identifier for each department"
+        tests:
+          - not_null
+          - unique
+
+#DQ Check for Product Order Table
+# - name: stg_insta_order_products_grp6
+#    description: "Order and Product Table"
+#    columns:
+#      - name: product_id
+#        description: "No nulls for product ID"
+#        tests:
+#          - not_null
+#      - name: order_id
+#        description: "No nulls for order ID"
+#        tests:
+#          - not null
+
+#    tests:
+#      - dbt_utils.unique_combination_of_columns:
+#          combination_of_columns:
+#            - order_id
+#            - product_id
+
+      
+          
+
+#DQ Check for Order Table
+  - name: stg_insta_orders_grp6
+    description: "no nulls or empty values"
+    columns:
+      - name: order_id
+        description: "Unique identifier for each Order"
+        tests:
+          - not_null
+          - unique
+      - name: user_id
+        description: "No nulls or empty values for user ID"
+        tests:
+          - not_null
+
+#DQ Check for Products table
+  - name: stg_insta_products_grp6
+    description: "Cleaned product data"
+    columns:
+      - name: product_id
+        description: "Unique ID for each product"
+        tests:
+          - not_null
+          - unique
+      - name: aisle_id
+        description: "FK to aisles table"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_insta_aisles_grp6')
+              field: aisle_id
+      - name: department_id
+        description: "FK to departments table"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_insta_department_grp6')
+              field: department_id
+
+#Checking Referential integrity check
+  - name: stg_insta_order_products_grp6
+    description: "Mapping table between orders and products"
+
+    columns:
+      - name: order_id
+        description: "Unique order ID"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_insta_orders_grp6')   # parent table
+              field: order_id                    # matching column in parent table
+
+      - name: product_id
+        description: "Unique product ID"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_insta_products_grp6')  # parent table
+              field: product_id                   # matching column in parent table
+
+```
+      
   4. Mart Schema: 
   The cleaned data is then further processed into the mart schema, where it is modeled for analysis:
   
@@ -615,6 +732,13 @@ Open the docs locally:
 ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
 ```
 
+
+
+![dbt-docu](./dbt-docu.png) 
+
+
+
+
 --- 
   
 ⚙️ **Star Schema Design:**
@@ -678,9 +802,6 @@ ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
   - Importance of documentation  
 
 
-- **Real-World Connection:**  (for update)
-  *(How this exercise relates to actual data engineering workflows in industry.)*  
-
 ---
 
 ## 7. Future Improvements
@@ -688,7 +809,5 @@ ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
 - **Next Steps with More Time:**  
   - Will try to explore more business questions  
 
-- **Generalization:**  (for update)
-  *(How this workflow could be applied to other datasets or business domains.)*  
 
 
