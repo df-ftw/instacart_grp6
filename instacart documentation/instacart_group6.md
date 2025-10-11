@@ -98,6 +98,25 @@ ftw-de-bootcamp/
             └── ...
 ```
 
+---
+
+## 🧪 Running dbt Tests
+
+### Clean (structural tests)
+
+* Validate not-null constraints, accepted values, and row count consistency.
+* Defined in: `models/clean/schema.yml`
+
+**Run tests:**
+
+```bash
+docker compose --profile jobs run --rm \
+  -w /workdir/transforms/instacart_grp6 \
+  dbt test --profiles-dir . --target local
+```
+
+---
+
 ⚙️**Source Structure (Normalized):**  
 The flow of data from data sources through a series of transformations into a mart schema:
   1. Data Sources:
@@ -453,7 +472,7 @@ final as (
 select * from final
 ```
 
-  4. Mart Schema: (for update)
+  4. Mart Schema: 
   The cleaned data is then further processed into the mart schema, where it is modeled for analysis:
   
 - grp6_insta_dim_aisles
@@ -564,11 +583,45 @@ FROM {{ ref('stg_insta_orders_grp6') }} o
 
 
 ![ERD](./ERD.png)
- 
+
+
+---
+
+## ⚙️ Execute Models & Run Pipeline
+
+Build all models (`staging` → `clean` → `mart`) in this module:
+
+```bash
+docker compose --profile jobs run --rm \
+  -w /workdir/transforms/instacart_grp6 \
+  dbt build --profiles-dir . --target remote
+```
+
+---
+
+## 📖 Generate Documentation
+
+Generate static HTML documentation for this dbt project:
+
+```bash
+docker compose --profile jobs run --rm \
+  -w /workdir/transforms/instacart_grp6 \
+  dbt docs generate --profiles-dir . --target remote --static
+```
+
+Open the docs locally:
+
+```
+ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
+```
+
+--- 
   
 ⚙️ **Star Schema Design:** (For update) 
   - Fact Tables: *(e.g., FactSales, FactAssessment, FactRatings)*  
   - Dimension Tables: *(e.g., Customer, Date, Genre, Student, Demographics, Title, Person)*  
+  
+  
 
 ⚙️ **Challenges / Tradeoffs:**  
   *(E.g., handling missing data, many-to-many joins, exploding arrays, performance considerations.)*  
@@ -586,7 +639,7 @@ FROM {{ ref('stg_insta_orders_grp6') }} o
   | Aly            | Standard Data Cleaning (Aisle), Documentation                                                                               |
   | Angel          | Standard Data Cleaning (Orders), Create Fact and Dimension Tables based on the business question                            |
   | Nella          | Standard Data Cleaning (Products), Documentation                                                                            |
-  | Wish           | Standard Data Cleaning (Combination of prior and train), Data Quality (DQ) Checks: Row Count, Referential Integrity check   |         |  
+  | Wish           | Standard Data Cleaning (Combination of prior and train), Data Quality (DQ) Checks: Row Count, Referential Integrity check   |         
 
 - **Shared vs Local Work:**  (for update)
   *(Issues faced with sync conflicts, version control, DB connections, etc.)*  
