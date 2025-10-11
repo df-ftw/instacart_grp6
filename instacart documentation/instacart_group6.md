@@ -618,8 +618,8 @@ ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
 --- 
   
 ⚙️ **Star Schema Design:** (For update) 
-  - Fact Tables: *(e.g., FactSales, FactAssessment, FactRatings)*  
-  - Dimension Tables: *(e.g., Customer, Date, Genre, Student, Demographics, Title, Person)*  
+
+![star schema](./star schema.png) 
   
   
 

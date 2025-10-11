@@ -1,0 +1,137 @@
+version: 2
+
+models:
+  # ============================
+  # DIMENSION TABLES
+  # ============================
+
+  - name: dim_aisles
+    description: "Dimension table containing aisle information."
+    columns:
+      - name: aisle_id
+        description: "Primary key for aisles."
+        tests:
+          - not_null
+          - unique
+      - name: aisle
+        description: "Name of the aisle."
+
+  - name: dim_departments
+    description: "Dimension table containing department information."
+    columns:
+      - name: department_id
+        description: "Primary key for departments."
+        tests:
+          - not_null
+          - unique
+      - name: department
+        description: "Name of the department."
+
+  - name: dim_users
+    description: "Dimension table for Instacart users."
+    columns:
+      - name: user_id
+        description: "Primary key for users."
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_products
+    description: "Dimension table containing product information."
+    columns:
+      - name: product_id
+        description: "Primary key for products."
+        tests:
+          - not_null
+          - unique
+      - name: product_name
+        description: "Name of the product."
+      - name: aisle_id
+        description: "Foreign key linking to dim_aisles."
+        tests:
+          - relationships:
+              to: ref('dim_aisles')
+              field: aisle_id
+      - name: department_id
+        description: "Foreign key linking to dim_departments."
+        tests:
+          - relationships:
+              to: ref('dim_departments')
+              field: department_id
+
+  - name: dim_eval_sets
+    description: "Dimension table defining evaluation sets (train, prior, test)."
+    columns:
+      - name: eval_set_id
+        description: "Primary key for eval sets."
+        tests:
+          - not_null
+          - unique
+      - name: eval_set_name
+        description: "Name of the evaluation set."
+
+  - name: dim_dow
+    description: "Dimension table mapping order_dow values (0–6) to weekdays."
+    columns:
+      - name: order_dow
+        description: "Primary key for day of week."
+        tests:
+          - not_null
+          - unique
+      - name: name_of_day
+        description: "Name of the day (Sunday–Saturday)."
+
+  # ============================
+  # FACT TABLES
+  # ============================
+
+  - name: fact_orders
+    description: "Fact table containing order-level transactions."
+    columns:
+      - name: order_id
+        description: "Primary key for orders."
+        tests:
+          - not_null
+          - unique
+      - name: user_id
+        description: "Foreign key linking to dim_users."
+        tests:
+          - relationships:
+              to: ref('dim_users')
+              field: user_id
+      - name: eval_set_id
+        description: "Foreign key linking to dim_eval_sets."
+        tests:
+          - relationships:
+              to: ref('dim_eval_sets')
+              field: eval_set_id
+      - name: order_dow
+        description: "Foreign key linking to dim_dow."
+        tests:
+          - relationships:
+              to: ref('dim_dow')
+              field: order_dow
+      - name: order_hour_of_day
+        description: "Hour of the day when the order was placed."
+      - name: days_since_prior_order
+        description: "Days since previous order by the same user."
+
+  - name: fact_order_products
+    description: "Fact table mapping ordered products to each order."
+    columns:
+      - name: order_id
+        description: "Foreign key linking to fact_orders."
+        tests:
+          - relationships:
+              to: ref('fact_orders')
+              field: order_id
+      - name: product_id
+        description: "Foreign key linking to dim_products."
+        tests:
+          - relationships:
+              to: ref('dim_products')
+              field: product_id
+      - name: add_to_cart_order
+        description: "Sequence number of when the product was added to the cart."
+      - name: reordered
+        description: "Indicates whether the user has ordered this product before (1 = yes, 0 = no)."
