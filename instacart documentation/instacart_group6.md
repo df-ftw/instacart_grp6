@@ -588,7 +588,15 @@ models:
               field: product_id                   # matching column in parent table
 
 ```
-      
+ 
+- dbt check test
+
+
+![dbt-check](./dbt-check.png)
+
+
+
+ 
   4. Mart Schema: 
   The cleaned data is then further processed into the mart schema, where it is modeled for analysis:
   
