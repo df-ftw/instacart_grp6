@@ -659,6 +659,7 @@ ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
  
 - **Dashboards / Queries:**  (for update)
   *(Add screenshots, SQL snippets, or summaries of dashboards created in Metabase.)*  
+  
 
 - **Key Insights:**  (for update)
   - *(Highlight 1–2 interesting findings. Example: “Rock was the top genre in North America, while Latin genres dominated in South America.”)*  
@@ -677,6 +678,7 @@ ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
 - **Team Learnings:**  
   - Collaboration in shared environments
   - Importance of documentation  
+
 
 - **Real-World Connection:**  (for update)
   *(How this exercise relates to actual data engineering workflows in industry.)*  
