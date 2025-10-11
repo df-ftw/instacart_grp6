@@ -786,7 +786,11 @@ ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
   1. *Top 10 most reordered products*  
  
 - **Dashboards / Queries:**  (for update)
-  *(Add screenshots, SQL snippets, or summaries of dashboards created in Metabase.)*  
+
+![bar-chart](./bar-chart.png)  
+
+
+![dq-check](./dq-check.png)  
   
 
 - **Key Insights:**  (for update)
