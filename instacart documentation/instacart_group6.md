@@ -801,21 +801,21 @@ ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
 
 - **Key Insights:**  
   
-  1. Data Quality Check: Row Count and Referential Integrity
+1. Data Quality Check: Row Count and Referential Integrity
 
 	- Ensure data consistency and integrity in the pipeline.
 
-  2. Row Count Diff Checker:
+2. Row Count Diff Checker:
 
 	- All tables (insta_aisles, insta_department, insta_products, insta_order_products) passed the check with no discrepancies between raw and cleaned data.
 	- Zero (0) row differences for each table, confirming that no data loss or duplication occurred.
 
-  3. Referential Integrity Check:
+3. Referential Integrity Check:
 
 	- Valid relationships were maintained in insta_products with respect to aisle_id.
 	- Integrity check passed, confirming all product entries are correctly linked to aisle IDs.
 
-  4. Top 10 Most Reordered Products:
+4. Top 10 Most Reordered Products:
 
 	- The top two products are Banana (415,166 reorders) and Bag of Organic Bananas (329,275 reorders), with organic products like Organic Strawberries and Organic Avocado also ranking high. These products reflect the growing trend for organic and fresh produce.
 	- Bananas lead by a significant margin, indicating a high-frequency purchase pattern.
