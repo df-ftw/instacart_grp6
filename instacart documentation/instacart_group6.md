@@ -617,7 +617,8 @@ ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
 
 --- 
   
-⚙️ **Star Schema Design:** (For update) 
+⚙️ **Star Schema Design:**
+
 
 ![star schema](./star schema.png) 
   
