@@ -816,6 +816,7 @@ ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
 
 - **Next Steps with More Time:**  
   - Will try to explore more business questions  
+  - Improve DQ Metabase Dashboard
 
 
 
