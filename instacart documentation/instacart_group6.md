@@ -771,8 +771,6 @@ ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
   | Nella          | Standard Data Cleaning (Products), Documentation                                                                            |
   | Wish           | Standard Data Cleaning (Combination of prior and train), Data Quality (DQ) Checks: Row Count, Referential Integrity check   |         
 
-- **Shared vs Local Work:**  (for update)
-  *(Issues faced with sync conflicts, version control, DB connections, etc.)*  
 
 - **Best Practices Learned:**  
 	- Version Control with Git:
