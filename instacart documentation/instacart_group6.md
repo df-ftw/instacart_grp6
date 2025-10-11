@@ -624,9 +624,6 @@ ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
   
   
 
-⚙️ **Challenges / Tradeoffs:**  
-  *(E.g., handling missing data, many-to-many joins, exploding arrays, performance considerations.)*  
-
 ---
 
 ## 4. Collaboration & Setup
