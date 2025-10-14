@@ -506,24 +506,6 @@ models:
           - not_null
           - unique
 
-#DQ Check for Product Order Table
-# - name: stg_insta_order_products_grp6
-#    description: "Order and Product Table"
-#    columns:
-#      - name: product_id
-#        description: "No nulls for product ID"
-#        tests:
-#          - not_null
-#      - name: order_id
-#        description: "No nulls for order ID"
-#        tests:
-#          - not null
-
-#    tests:
-#      - dbt_utils.unique_combination_of_columns:
-#          combination_of_columns:
-#            - order_id
-#            - product_id
 
       
           
