@@ -778,7 +778,7 @@ ftw-de-bootcamp/dbt/transforms/instacart_grp6/target/static_index.html
 ![peak_hours](./peak_hours.png)  
 
 
-![dq-check](./dq-check.png)  
+![dq_check](./dq_check.png)  
 
 
   
